@@ -1,6 +1,6 @@
 # Importa a biblioteca necessária para criar um documento do Word
 from docx import Document
-
+from io import BytesIO
 # Função para gerar um relatório em formato Word a partir dos dados filtrados para o cliente.
 def gerar_relatorio(df_cliente):
 
@@ -16,6 +16,11 @@ def gerar_relatorio(df_cliente):
     # Criação de tabela no documento
     tabela = document.add_table(rows=1, cols=num_colunas)
 
+    # Configuração de formatação da tabela
+    tabela.autofit = False  # Ajusta a largura das colunas automaticamente
+
+     
+
     # Seleciona as células da primeira linha da tabela para adicionar os cabeçalhos
     celulas_cabecalho = tabela.rows[0].cells
 
@@ -24,12 +29,17 @@ def gerar_relatorio(df_cliente):
          celulas_cabecalho[i].text = nome_coluna
 
     # Adiciona os dados do DataFrame à tabela
-    for indice, linha in df_cliente.iterrows():
+    for _, linha in df_cliente.iterrows():
          tabela_linha = tabela.add_row().cells  # Adiciona uma nova linha à tabela e obtém as células dessa linha
 
         # Preenche as células da linha com os valores correspondentes do DataFrame
          for i, valor in enumerate(linha):
              tabela_linha[i].text = str(valor)  # Converte o valor para string e adiciona à célula
 
-    # Salva o documento Word com um nome específico
-    document.save('relatorio_cliente.docx')
+    buffer = BytesIO()
+
+    document.save(buffer)
+
+    buffer.seek(0)
+
+    return buffer
